@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import logo from '/logo.png'
 import { TbPhoneCall } from "react-icons/tb";
-
+import { FaRegUser } from "react-icons/fa";
+import Modal from './Modal';
+import { AuthContext } from '../contexts/AuthProvider';
+import Profile from './Profile';
 
 
 
@@ -36,6 +39,9 @@ const navItems =
 
 const Navbar = () => {
     const [isSticky, setSticky] = useState(false);
+
+    const { user } = useContext(AuthContext);
+    console.log(user)
     //handle scroll functions
     useEffect(() => {
         const handleScroll = () => {
@@ -123,8 +129,17 @@ const Navbar = () => {
                             <span className="badge badge-sm indicator-item">8</span>
                         </div>
                     </div>
-                    {/* btn */}
-                    <a className="btn bg-green rounded-full px-6 text-white flex items-center gap-2"><TbPhoneCall /> Contact</a>
+                    {/* login/logout button */}
+                    {user ? (
+                        <Profile user={user} />
+                    ) : (
+                        <button
+                            onClick={() => document.getElementById('my_modal_5').showModal()}
+                            className="btn bg-green rounded-full px-6 text-white flex items-center gap-2">
+                            <FaRegUser /> Login
+                        </button>
+                    )}
+                    <Modal />
                 </div>
             </div>
         </header>
