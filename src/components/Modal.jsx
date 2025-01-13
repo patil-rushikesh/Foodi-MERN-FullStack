@@ -3,6 +3,7 @@ import { FaFacebookF, FaGoogle } from 'react-icons/fa'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useForm } from "react-hook-form"
 import { AuthContext } from '../contexts/AuthProvider'
+import useAxiosPublic from '../hooks/useAxiosPublic'
 
 const Modal = () => {
     const {
@@ -10,9 +11,10 @@ const Modal = () => {
         handleSubmit,
         formState: { errors },
     } = useForm()
-    const [errorMessage, setErrorMessage] = useState("");
-    const { signUpwithGmail, login } = useContext(AuthContext);
 
+    const [errorMessage, setErrorMessage] = useState("");
+    const { signUpWithGmail, login } = useContext(AuthContext);
+    const axiosPublic = useAxiosPublic();
     // redirecting to home page or Specific page
     const location = useLocation();
     const navigate = useNavigate();
@@ -23,41 +25,52 @@ const Modal = () => {
         const email = data.email;
         const password = data.password;
         login(email, password)
-        .then(
-            (result) =>{
-                const user = result.user;
-                alert("Login Successful");
-                document.getElementById('my_modal_5').close()
-                navigate(from, {replace:true})
-            }
-        )
-        .catch(
-            (error)=>{
-                const errorMessage = error.message
-                setErrorMessage("Provide a Correct Email and Password!")
-            }
-        )
+            .then(
+                (result) => {
+                    // const user = result.user;
+                    // const userInfo = {
+                    //     name: data.name,
+                    //     email: data.email,
+                    // }
+                    // axiosPublic.post('/users/login', userInfo)
+                    //     .then((res) => {
+                            alert("Login successful!");
+                            document.getElementById('my_modal_5').close();
+                            navigate(from, { replace: true });
+                        // })
+                }
+            )
+            .catch(
+                (error) => {
+                    const errorMessage = error.message
+                    console.log("Error Message : ", errorMessage)
+                    setErrorMessage("Provide a Correct Email and Password!")
+                }
+            )
     }
 
 
     //google signin
     const handleLogin = () => {
-        signUpwithGmail()
-        .then(
-            (result) =>{
+        signUpWithGmail()
+            .then((result) => {
                 const user = result.user;
-                alert("Login Successful!")
-                document.getElementById('my_modal_5').close()
-                navigate(from, {replace:true})
-            }
-        )
-        .catch(
-            (error)=>
-            {
-                console.log(error);
-            }
-        )
-    }
+                const userInfo = {
+                    name: result?.user?.displayName,
+                    email: result?.user?.email,
+                }
+                axiosPublic.post('/users', userInfo)
+                    .then((res) => {
+                        alert("Login successful!");
+                        document.getElementById('my_modal_5').close();
+                        navigate("/");
+                    })
+            })
+            .catch((error) => {
+                console.error(error);
+                alert(error.message);
+            });
+    };
     return (
         <dialog id="my_modal_5" className="modal modal-middle sm:modal-middle">
             <div className="modal-box">
@@ -84,7 +97,7 @@ const Modal = () => {
 
                         {/* error */}
                         {
-                            errorMessage? <p className='text-red text-sm italic'>{errorMessage}</p>:""
+                            errorMessage ? <p className='text-red text-sm italic'>{errorMessage}</p> : ""
                         }
                         {/* login Button */}
                         <div className="form-control mt-6">
