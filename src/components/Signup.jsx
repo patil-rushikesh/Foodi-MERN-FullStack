@@ -3,7 +3,10 @@ import { FaGoogle } from 'react-icons/fa';
 import { useForm } from "react-hook-form";
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Modal from './Modal';
-import { AuthContext } from '../contexts/AuthProvider';
+import { AuthContext } from '../contexts/AuthProvider'
+import axios from 'axios'
+import useAxiosPublic from '../hooks/useAxiosPublic';
+
 
 const Signup = () => {
     const {
@@ -12,7 +15,9 @@ const Signup = () => {
         formState: { errors },
     } = useForm();
 
-    const { createUsers, signUpwithGmail } = useContext(AuthContext);
+    const { createUsers, signUpWithGmail, updateUserProfile } = useContext(AuthContext);
+    const axiosPublic = useAxiosPublic();
+
     const location = useLocation();
     const navigate = useNavigate();
     const from = location.state?.from?.pathname || "/";
@@ -22,9 +27,20 @@ const Signup = () => {
         const password = data.password;
         createUsers(email, password)
             .then((result) => {
-                alert("Account creation successful!");
-                document.getElementById('my_modal_5').close();
-                navigate(from, { replace: true });
+                const user = result.user;
+                updateUserProfile(data.email, data.photoURL).then(() => {
+                    const userInfo = {
+                        name: data.name,
+                        email: data.email,
+                    }
+                    axiosPublic.post('/users/signup', userInfo)
+                        .then((res) => {
+                            alert("Account creation successful!");
+                            document.getElementById('my_modal_5').close();
+                            navigate(from, { replace: true });
+                        })
+                })
+
             })
             .catch((error) => {
                 console.error(error);
@@ -33,11 +49,19 @@ const Signup = () => {
     };
 
     const handleLogin = () => {
-        signUpwithGmail()
+        signUpWithGmail()
             .then((result) => {
-                alert("Login Successful!");
-                document.getElementById('my_modal_5').close();
-                navigate(from, { replace: true });
+                const user = result.user;
+                const userInfo = {
+                    name: result?.user?.displayName,
+                    email: result?.user?.email,
+                }
+                axiosPublic.post('/users', userInfo)
+                    .then((res) => {
+                        alert("Login successful!");
+                        document.getElementById('my_modal_5').close();
+                        navigate("/");
+                    })
             })
             .catch((error) => {
                 console.error(error);
@@ -50,6 +74,17 @@ const Signup = () => {
             <div className="modal-action flex flex-col justify-center mt-0">
                 <form onSubmit={handleSubmit(onSubmit)} className="card-body" method='dialog'>
                     <h3 className="font-bold text-lg">Create an Account</h3>
+                    <div className="form-control">
+                        <label className="label">
+                            <span className="label-text">Name</span>
+                        </label>
+                        <input
+                            type="text"
+                            placeholder="name"
+                            className="input input-bordered"
+                            {...register("name", { required: "Name is required" })}
+                        />
+                    </div>
                     {/* email */}
                     <div className="form-control">
                         <label className="label">
@@ -84,7 +119,7 @@ const Signup = () => {
                         <input type='submit' value="Signup" className="btn bg-green text-white" />
                     </div>
                     <p className='text-center my-2'>
-                        Already have an account? 
+                        Already have an account?
                         <button
                             onClick={() => document.getElementById('my_modal_5').showModal()}
                             className='underline text-red ml-1'

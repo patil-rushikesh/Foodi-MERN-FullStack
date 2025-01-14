@@ -10,7 +10,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@stripe/react-stripe-js": "^2.7.3",
+    "@stripe/stripe-js": "^4.2.0",
+    "@tanstack/react-query": "^5.51.15",
+    "axios": "^1.7.3",
     "firebase": "^10.12.4",
+    "foodi-client": "file:",
     "localforage": "^1.10.0",
     "match-sorter": "^6.3.4",
     "react": "^18.3.1",
@@ -20,7 +25,8 @@
     "react-router-dom": "^6.25.1",
     "react-slick": "^0.30.2",
     "slick-carousel": "^1.8.1",
-    "sort-by": "^1.2.0"
+    "sort-by": "^1.2.0",
+    "sweetalert2": "^11.12.3"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",
